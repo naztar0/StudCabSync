@@ -2,6 +2,7 @@ import json
 import requests
 from contextlib import suppress
 from app import misc
+from app import config
 from app.utils.database_connection import DatabaseConnection
 
 
@@ -91,41 +92,18 @@ def get_update_json(filename, key=None, value=None):
         json.dump(data, f, ensure_ascii=False)
 
 
-def api_request(params=None, url=misc.api_url_v2, student=None) -> dict | None:
+def api_request(app_id, params=None, url=misc.api_url_v2, student=None) -> dict | None:
+    proxies = get_proxy(app_id)
     if url == misc.api_url_v2:
         _json = (params or {}) | misc.api_required_params
         if student:
             _json['marks'] = generate_hash_array(student)
-        response = req_post(url, json=_json)
+        response = req_post(url, json=_json, proxies=proxies)
     else:
-        response = req_post(url, params=params)
+        response = req_post(url, params=params, proxies=proxies)
     if response:
         with suppress(json.decoder.JSONDecodeError):
             return response.json()
-
-
-def get_user_profile(student: Student) -> dict | None:
-    return api_request({'email': student.email, 'pass': student.password, 'page': 1})
-
-
-def get_user_record_book(student: Student, semester: int) -> dict | None:
-    return api_request({'email': student.email, 'pass': student.password, 'page': 2, 'semester': semester}, student=student)
-
-
-def get_user_debts(student: Student) -> dict | None:
-    return api_request({'email': student.email, 'pass': student.password, 'page': 3}, student=student)
-
-
-def get_user_syllabus(student: Student, semester: int) -> dict | None:
-    return api_request({'email': student.email, 'pass': student.password, 'page': 4, 'semester': semester}, student=student)
-
-
-def get_user_rating(student: Student, semester: int) -> dict | None:
-    return api_request({'email': student.email, 'pass': student.password, 'page': 5, 'semester': semester}, student=student)
-
-
-def get_user_payments(student: Student) -> dict | None:
-    return api_request({'email': student.email, 'pass': student.password, 'page': 6}, student=student)
 
 
 def generate_hash_array(student: Student) -> tuple[int]:
@@ -213,3 +191,15 @@ def syllabus_convert_to_enums(syllabus):
         individual_task = 3
 
     return control, individual_task
+
+
+def get_proxy(app_id) -> dict:
+    with open(misc.app_dir / 'proxy.txt', 'r') as f:
+        proxies = f.read().splitlines()
+    ip = proxies[app_id]
+    url = f'{config.PROXY_USER}{ip}:{config.PROXY_PASSWORD}@{config.PROXY_URL}'
+    # noinspection HttpUrlsUsage
+    return {
+        'http': f'http://{url}',
+        'https': f'https://{url}'
+    }

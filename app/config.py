@@ -19,3 +19,7 @@ CACHE_PREFIX = env.str('CACHE_PREFIX', default='')
 APP_ID_MODE = env.bool('APP_ID_MODE', default=False)
 APP_COUNT = env.int('APP_COUNT', default=1)
 APP_ID = env.int('APP_ID', default=0)
+
+PROXY_URL = env.str('PROXY_URL', default='')
+PROXY_USER = env.str('PROXY_USER', default='')
+PROXY_PASSWORD = env.str('PROXY_PASSWORD', default='')
