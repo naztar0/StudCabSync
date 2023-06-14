@@ -35,15 +35,16 @@ def run():
             logging.debug('Registering user')
             user_id = register_user(user_api, email, password)
         user = utils.get_user(user_id)
+        syncer = syncers.Syncers(0, user)
         logging.debug('Syncing syllabus')
-        syncers.sync_syllabus(user)
+        syncer.sync_syllabus()
         logging.debug('Syncing record book')
-        syncers.sync_record_book(user)
+        syncer.sync_record_book()
         logging.debug('Syncing rating')
-        syncers.sync_rating(user)
+        syncer.sync_rating()
         if user.payment == 'contract':
             logging.debug('Syncing payments')
-            syncers.sync_payments(user)
+            syncer.sync_payments()
         cache.delete(key)
 
 
