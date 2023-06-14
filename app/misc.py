@@ -4,8 +4,6 @@ from pathlib import Path
 
 
 app_dir: Path = Path(__file__).parent.parent
-locales_dir = app_dir / "locales"
-temp_dir = app_dir / "temp"
 
 if config.DEBUG:
     logging.basicConfig(level=logging.DEBUG)
